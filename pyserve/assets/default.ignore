@@ -1,0 +1,12 @@
+# Ignore rules for pyserve, gitignore style.
+#
+# The last rule that matches an entry wins, so a '!' rule placed after a broader
+# rule brings that entry back into view.
+#
+# A rule containing a '/' is anchored to the served root, exactly as in
+# gitignore, so '__pycache__/*' would only ever match at the top level. Write
+# '__pycache__/' instead to hide the folder wherever it turns up.
+
+.env.*
+!.env.example
+__pycache__/

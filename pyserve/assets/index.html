@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>__TITLE__</title>
+<link rel="icon" href="/static/favicon.ico" sizes="any">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<main>
+
+  <div class="topline">
+    <div class="path" id="pathLine"></div>
+    <div class="session" id="sessionLine"></div>
+  </div>
+
+  <div class="toolbar">
+    <div class="search-wrap" id="searchWrap">
+      <input type="text" id="searchInput" placeholder="search, or a pattern like *.sql, or /regex/&hellip;" autocomplete="off">
+      <button class="clear-btn" id="clearSearch" type="button" aria-label="clear search">&times;</button>
+    </div>
+    <button class="tool-btn" id="uploadBtn" type="button">+ Upload</button>
+    <button class="tool-btn done-btn" id="doneBtn" type="button" style="display:none;">Done</button>
+  </div>
+  <input type="file" id="uploadInput" multiple style="display:none">
+
+  <table id="fileTable">
+    <thead>
+      <tr>
+        <th data-sort="name">Name <span class="arrow"></span></th>
+        <th data-sort="size" class="num">Size <span class="arrow"></span></th>
+        <th data-sort="date" class="num date-col">Date Modified <span class="arrow"></span></th>
+      </tr>
+    </thead>
+    <tbody id="listing"></tbody>
+  </table>
+
+</main>
+
+<div class="drop-overlay" id="dropOverlay">
+  <div class="drop-overlay-inner">Drop to upload to <strong id="dropOverlayPath"></strong></div>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" id="modalBox"></div>
+</div>
+
+<div class="corner-stack">
+  <div class="toast-container" id="toastContainer"></div>
+  <div class="upload-panel" id="uploadPanel">
+    <div class="upload-head">
+      <span class="upload-title" id="uploadTitle">Uploading</span>
+      <div class="upload-actions">
+        <button type="button" id="uploadToggle" aria-label="collapse">&minus;</button>
+        <button type="button" id="uploadClose" aria-label="close">&times;</button>
+      </div>
+    </div>
+    <div class="upload-list" id="uploadList"></div>
+  </div>
+</div>
+
+<script>window.PYSERVE = __STATE_JSON__;</script>
+<script src="/static/app.js"></script>
+</body>
+</html>

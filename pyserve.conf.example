@@ -1,0 +1,426 @@
+# ===========================================================================
+# pyserve.conf
+# ===========================================================================
+#
+# Copy this file to pyserve.conf, drop it next to the directory you are serving
+# (or in the directory you launch pyserve from) and it is picked up on its own.
+#
+#     cp pyserve.conf.example pyserve.conf
+#
+# Point at a different file with -c/--config, or turn the autodiscovery off
+# entirely with --no-config.
+#
+# ---------------------------------------------------------------------------
+# How settings are resolved
+# ---------------------------------------------------------------------------
+#
+# Four layers, each one overriding the one before it:
+#
+#     built-in defaults  ->  PYSERVE_* environment  ->  this file  ->  CLI flags
+#
+# So a value here beats an environment variable, and a command line flag beats
+# both. Every key below is also an environment variable, prefixed with PYSERVE_:
+#
+#     PORT=9000            becomes    PYSERVE_PORT=9000
+#     AUTH_MODE=form       becomes    PYSERVE_AUTH_MODE=form
+#
+# ---------------------------------------------------------------------------
+# Syntax
+# ---------------------------------------------------------------------------
+#
+#   KEY=VALUE       one setting per line, no spaces needed around the '='
+#   # comment       a line starting with '#' is ignored, as are blank lines
+#   KEY="value"     surrounding single or double quotes are stripped
+#   [name]          opens a block, whose lines are read as that block's own
+#                   format rather than as KEY=VALUE
+#   [end]           closes a block and returns to plain KEY=VALUE settings
+#
+# Booleans accept true/false, yes/no, on/off, 1/0 and enabled/disabled.
+# Unknown keys are ignored, so a config written for a newer pyserve still loads.
+#
+# Every value shown below is the built-in default. Uncomment only the lines you
+# actually want to change.
+
+
+# ===========================================================================
+# What to serve, and where
+# ===========================================================================
+
+# Directory to serve. Relative paths resolve against the working directory of
+# the process, not against this file. '~' is expanded.
+DIRECTORY=.
+
+# Address to bind. 0.0.0.0 accepts connections from anywhere on the network.
+# Use 127.0.0.1 to keep pyserve reachable only from this machine, which is what
+# you want when something like nginx or caddy sits in front of it.
+HOST=0.0.0.0
+
+# Port to bind. 0 asks the operating system for any free port, which is mostly
+# useful when embedding PyServe as a library.
+PORT=8000
+
+# Name shown in the breadcrumb at the top of the listing and on the sign in
+# page. Left empty it falls back to the name of the served directory.
+#
+#   TITLE=Release Artifacts
+TITLE=
+
+# Text shown in the browser tab. Left empty it becomes "pyserve: <TITLE>".
+#
+#   PAGE_TITLE=Internal file drop
+PAGE_TITLE=
+
+
+# ===========================================================================
+# Hiding files
+# ===========================================================================
+
+# Name of the ignore file, resolved at the root of the served directory. It uses
+# gitignore semantics, including '!' negation, it applies at every depth, and it
+# never shows up in a listing itself. Anything it hides is invisible to listing,
+# to search and to download alike.
+IGNORE_FILE=.ignore
+
+# When the served directory has no ignore file of its own, fall back to the
+# rules bundled with pyserve:
+#
+#     .env.*
+#     !.env.example
+#     __pycache__/*
+#
+# Set this to false to serve with no rules at all in that case.
+DEFAULT_IGNORE=true
+
+# Dotfiles are shown by default, since an ignore rule is the intended way to
+# hide things. Set this to false to hide every entry whose name starts with a
+# dot, on top of whatever the ignore file already hides.
+SHOW_HIDDEN=true
+
+# Symlinks are listed but not followed, so a link pointing outside the served
+# directory cannot be used to read past it. Only turn this on when you trust
+# every link in the tree.
+FOLLOW_SYMLINKS=false
+
+
+# ===========================================================================
+# Permissions
+# ===========================================================================
+
+# The hard switch. READ_ONLY=true forces ENABLE_UPLOAD, ENABLE_RENAME,
+# ENABLE_MOVE and ENABLE_DELETE to false no matter what they are set to below,
+# and the UI hides the matching controls so it always agrees with the server.
+#
+# If the served directory is mounted read only at the OS level, for instance a
+# Docker volume with ':ro', set this so the UI reflects that instead of every
+# write failing with a storage error.
+READ_ONLY=false
+
+# Individual write permissions. Each one is enforced server side, so a request
+# sent straight at the API is refused exactly like a click in the UI would be.
+ENABLE_UPLOAD=true
+ENABLE_RENAME=true
+ENABLE_MOVE=true
+ENABLE_DELETE=true
+
+# Read permissions. Browsing always works; these two only cover the search
+# endpoint and the download route.
+ENABLE_SEARCH=true
+ENABLE_DOWNLOAD=true
+
+# Reject uploads larger than this many megabytes. 0 means unlimited. The browser
+# marks an oversized file as failed without sending it, and the server refuses
+# it with 413 even if something bypasses the UI.
+#
+#   MAX_UPLOAD_MB=512
+MAX_UPLOAD_MB=0
+
+
+# ===========================================================================
+# Search
+# ===========================================================================
+
+# Maximum number of entries a single search returns. Results come back ranked,
+# so a lower number keeps the tree view readable on a large filesystem.
+SEARCH_LIMIT=300
+
+# Search runs from the folder being looked at, not from the served root, and the
+# results come back as a tree rooted there.
+#
+# The box takes a fuzzy query, a shell style pattern, or a regular expression:
+#
+#   report           fuzzy, matches 'quarterly-report.pdf'
+#   *.sql            every SQL file at any depth below here
+#   *.sql;*.db       several patterns at once, separated by ';'
+#   deep/*.py        a pattern with '/' matches the path relative to this folder
+#   test_?.py        '?' matches exactly one character
+#   /\.sql$/         a regular expression, wrapped in slashes
+#   /^test_/i        the 'i' flag makes the regex case insensitive
+#
+# Globs and fuzzy queries are case insensitive; a regex is case sensitive unless
+# the 'i' flag is given. There is nothing to configure here, it is just what the
+# box accepts.
+#
+# A regex is evaluated on the server against every visible name below the folder
+# being searched. Set ENABLE_SEARCH=false, or require credentials with AUTH_MODE,
+# if that is not something you want exposed.
+
+
+# ===========================================================================
+# Uploads
+# ===========================================================================
+
+# How many files the browser uploads at the same time. The rest queue up behind
+# them and start as slots free. Raise it on a fast link, lower it if the server
+# is behind something that limits concurrent connections.
+UPLOAD_CONCURRENCY=3
+
+# Read and write chunk size in bytes, used for both downloads and uploads.
+# 256 KiB suits most setups; raise it for very large files on fast storage.
+CHUNK_SIZE=262144
+
+
+# ===========================================================================
+# Directory cache
+# ===========================================================================
+
+# Directory listings are held in memory so a deep tree stays fast.
+#
+# Nothing is cached while the first listing is being served. Once that first
+# request is done, the cache walks the whole tree in the background, so the
+# deeper folders are already in memory by the time anyone clicks into them.
+# Search uses the warmed cache instead of walking the disk again.
+#
+# Every page load resets the cache and warms it from scratch, so a listing is
+# never served from a stale entry. Uploads, renames, moves and deletes refresh
+# the folders they touched straight away.
+#
+# Counters are available at /api/cache.
+CACHE_ENABLED=true
+
+# Size of the warming pool. 0 picks a quarter of the machine's threads, which
+# leaves plenty of room for the requests actually being served. Raise it for a
+# very large tree on fast storage.
+#
+#   CACHE_THREADS=8
+CACHE_THREADS=0
+
+# Stop warming after this many directories. 0 means no limit. Use it as a safety
+# valve on a tree so large that caching all of it would be wasteful; search
+# falls back to walking the disk when the cache is incomplete.
+#
+#   CACHE_MAX_DIRS=50000
+CACHE_MAX_DIRS=0
+
+
+# ===========================================================================
+# Authentication
+# ===========================================================================
+
+# none   no authentication at all
+# basic  HTTP basic auth, the browser shows the usual popup, same as nginx
+# form   a sign in page that hands out a session cookie
+AUTH_MODE=none
+
+# all    credentials are required for every route
+# write  anyone can browse, download and search, but upload, rename, move and
+#        delete ask for credentials first
+AUTH_SCOPE=all
+
+# Credentials as USER:SECRET pairs separated by commas. A secret can be:
+#
+#   a plain password           alice:hunter2
+#   a sha256 digest            alice:sha256$9f86d0818...
+#   a pbkdf2 string            alice:pbkdf2$240000$1f0c...$9ad4...
+#
+# Generate the pbkdf2 form with 'pyserve --hash-password', which prompts twice
+# and prints the string to paste here. Prefer it over a plain password whenever
+# this file is checked in or shared.
+#
+#   AUTH_USERS=alice:hunter2,bob:pbkdf2$240000$1f0c...$9ad4...
+AUTH_USERS=
+
+# An htpasswd style file of USER:SECRET lines, one per line, '#' for comments.
+# Entries here are merged on top of AUTH_USERS, so a name in both wins from the
+# file. Keep it outside the served directory, or hide it with an ignore rule.
+#
+#   AUTH_USERS_FILE=/etc/pyserve/users
+AUTH_USERS_FILE=
+
+# Realm shown in the basic auth popup. Ignored in the other modes.
+AUTH_REALM=pyserve
+
+# Sign in form only. How long a session lasts, in seconds, and the name of the
+# cookie it lives in. The cookie is always HttpOnly and SameSite=Strict.
+SESSION_TTL=86400
+SESSION_COOKIE=pyserve_session
+
+# Add the Secure flag to the session cookie so it is only ever sent over HTTPS.
+# Turn this on whenever pyserve is reachable over TLS, either directly or
+# through a reverse proxy. Leave it off for plain HTTP or the cookie is dropped.
+COOKIE_SECURE=false
+
+
+# ===========================================================================
+# Access control (IAM)
+# ===========================================================================
+
+# Authentication answers "who are you". IAM answers "what may you touch".
+# Without any rules every signed in user may do whatever the permission
+# settings above allow. Rules narrow that down per user, per path.
+#
+# A rule is four whitespace separated fields:
+#
+#     effect  users  actions  target
+#
+#   effect    allow or deny
+#             An unauthenticated visitor is called 'anonymous'.
+#   users     a username, several separated by commas, or * for everyone.
+#             A name prefixed with '!' is excluded, so 'deny !dana' applies to
+#             everyone except dana. Because a deny always wins, that is the
+#             only way to carve an exception out of one: a later allow cannot
+#             undo it.
+#   actions   list, download, search, upload, rename, move, delete,
+#             separated by commas. The aliases read (list, download, search),
+#             write (upload, rename, move, delete) and all are also accepted.
+#   target    what the rule covers, in one of four forms:
+#
+#               *.key            no separator, so it is matched against the
+#                                entry name alone, at any depth
+#               reports/         a trailing slash, so it covers the folder
+#                                itself and everything beneath it
+#               reports/**       covers the contents of reports, but not the
+#                                folder entry itself
+#               reports/q1.pdf   one exact path, relative to the served root
+#
+#             '*' stops at a separator, '**' crosses them, '?' matches one
+#             character, and matching is case insensitive so a deny cannot be
+#             slipped past with a different spelling. A target may contain
+#             spaces; it runs to the end of the line.
+#
+# An explicit deny always wins, whatever order the rules are in. A request is
+# allowed when no deny matches it and at least one allow does. When nothing
+# matches at all, IAM_DEFAULT decides.
+#
+# Prefer the 'reports/' form when you mean a folder. 'reports/**' covers what
+# is inside the folder but not the folder entry, so with IAM_DEFAULT=deny a
+# rule written that way lets a user see the files without being able to open
+# the folder they live in.
+#
+# IAM only ever narrows. A user still cannot delete anything when
+# ENABLE_DELETE=false, however generous a rule looks.
+
+# What happens when no rule matches a request. 'allow' means the rules are a
+# blocklist and everything else stays open. 'deny' means they are an allowlist
+# and anything not granted is refused.
+IAM_DEFAULT=allow
+
+# Rules can also live in their own file, one per line, same syntax as the block
+# below. Useful when the policy is managed separately from the rest of the
+# config. Its rules are added to whatever the block already declared.
+IAM_RULES_FILE=
+
+# The policy itself. Uncomment the block to switch it on. Rules from the config
+# file, from IAM_RULES_FILE and from --iam-rule on the command line are all
+# combined; because deny always wins, a later source can tighten access but
+# never loosen it.
+#
+# [iam]
+# # The default can also be set here, which keeps the whole policy in one place
+# default deny
+#
+# # Everyone who is signed in can look around
+# allow *      read           **
+#
+# # Nobody ever reads or writes a key file, wherever it turns up
+# deny  *      all            *.key
+#
+# # Finance keeps its own folder to dana. The exclusion has to live on the deny
+# # itself, because a later allow can never undo a deny.
+# deny  !dana  all            finance/
+# allow dana   all            finance/
+#
+# # Alice runs the place
+# allow alice  all            **
+#
+# # Bob may only add files to the drop box, and never remove anything
+# allow bob    upload         dropbox/
+# deny  bob    delete,move    **
+#
+# # Unauthenticated visitors get the public folder, read only
+# allow anonymous read        public/
+# [end]
+
+# ===========================================================================
+# TLS
+# ===========================================================================
+
+# Set both to serve HTTPS directly instead of plain HTTP. Setting only one is an
+# error. Leave both empty when a reverse proxy terminates TLS for you.
+#
+#   TLS_CERT=/etc/letsencrypt/live/files.example.com/fullchain.pem
+#   TLS_KEY=/etc/letsencrypt/live/files.example.com/privkey.pem
+TLS_CERT=
+TLS_KEY=
+
+
+# ===========================================================================
+# Output
+# ===========================================================================
+
+# debug, info, warning, error or quiet. debug adds cache warming details.
+LOG_LEVEL=info
+
+# Log a line for every request. Turn it off when pyserve sits behind a proxy
+# that already keeps an access log.
+ACCESS_LOG=true
+
+# Value sent in the Server response header. The Python and OS versions are never
+# advertised regardless of what this is set to.
+SERVER_HEADER=pyserve
+
+
+# ===========================================================================
+# Recipes
+# ===========================================================================
+#
+# A public read only mirror, TLS terminated by a proxy in front:
+#
+#   HOST=127.0.0.1
+#   READ_ONLY=true
+#   ACCESS_LOG=false
+#
+# A shared server where each team only sees its own folder:
+#
+#   AUTH_MODE=form
+#   AUTH_USERS_FILE=/etc/pyserve/users
+#   IAM_DEFAULT=deny
+#
+#   [iam]
+#   allow alice,bob   all   team-a/
+#   allow carol,dana  all   team-b/
+#   deny  *           all   *.key
+#   # with IAM_DEFAULT=deny the allowlist is enough; no blanket deny is needed
+#   [end]
+#
+# A private drop box, sign in page, 2 GB ceiling, uploads only:
+#
+#   AUTH_MODE=form
+#   AUTH_USERS=alice:pbkdf2$240000$...
+#   COOKIE_SECURE=true
+#   MAX_UPLOAD_MB=2048
+#   ENABLE_RENAME=false
+#   ENABLE_MOVE=false
+#   ENABLE_DELETE=false
+#
+# Open to browse on the LAN, credentials required before anything is changed:
+#
+#   AUTH_MODE=basic
+#   AUTH_SCOPE=write
+#   AUTH_USERS=alice:hunter2
+#
+# A very large archive tree, tuned for browsing:
+#
+#   READ_ONLY=true
+#   CACHE_THREADS=12
+#   CACHE_MAX_DIRS=200000
+#   SEARCH_LIMIT=100

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>__TITLE__</title>
+<link rel="icon" href="/static/favicon.ico" sizes="any">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="signin">
+
+<form class="signin-card" id="signinForm" autocomplete="on">
+  <img class="signin-logo" src="/static/logo.png" alt="pyserve">
+  <h1>__HEADING__</h1>
+  <div class="sub">Sign in to browse this directory.</div>
+
+  <div class="signin-error" id="signinError"></div>
+
+  <div class="field">
+    <label for="username">Username</label>
+    <input type="text" id="username" name="username" autocomplete="username" autofocus required>
+  </div>
+
+  <div class="field">
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" autocomplete="current-password" required>
+  </div>
+
+  <button type="submit" id="signinBtn">Sign in</button>
+</form>
+
+<script>window.PYSERVE = __STATE_JSON__;</script>
+<script src="/static/login.js"></script>
+</body>
+</html>

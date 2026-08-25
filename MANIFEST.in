@@ -1,0 +1,7 @@
+include README.md
+include LICENSE
+include pyserve.conf.example
+include .ignore
+recursive-include pyserve/assets *.html *.css *.js *.png *.ico *.ignore
+recursive-include docs *.md
+recursive-include tests *.py
