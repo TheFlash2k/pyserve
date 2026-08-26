@@ -2,10 +2,21 @@
 # pyserve.conf
 # ===========================================================================
 #
-# Copy this file to pyserve.conf, drop it next to the directory you are serving
-# (or in the directory you launch pyserve from) and it is picked up on its own.
+# Copy this file to pyserve.conf and it is picked up on its own. Three places
+# are searched, in this order, and the first file found is the one used:
 #
-#     cp pyserve.conf.example pyserve.conf
+#     1. next to the directory being served
+#     2. in the directory you launch pyserve from
+#     3. in your home directory
+#
+# In each one, pyserve.conf is tried first and then .pyserve.conf.
+#
+#     cp pyserve.conf.example pyserve.conf         # for this directory
+#     cp pyserve.conf.example ~/.pyserve.conf      # your personal defaults
+#
+# Home is searched last, so ~/.pyserve.conf holds the settings you always want
+# and a config next to a particular directory overrides them. The files are not
+# merged: the first one found is the only one read.
 #
 # Point at a different file with -c/--config, or turn the autodiscovery off
 # entirely with --no-config.

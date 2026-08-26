@@ -19,9 +19,28 @@ layer can only ever tighten the policy. See [Access control](iam.md).
 
 ## Finding the config file
 
-Without `-c`, pyserve looks for `pyserve.conf` and then `.pyserve.conf`, first
-next to the directory being served and then in the working directory. The first
-one found is used.
+Without `-c`, pyserve looks for a config file in three places, in this order:
+
+1. Next to the directory being served
+2. In the working directory
+3. In your home directory
+
+In each one it tries `pyserve.conf` first, then `.pyserve.conf`. The first file
+found is used, and the search stops there.
+
+```
+/srv/files/pyserve.conf     a config for this directory
+./pyserve.conf              a config for this project
+~/.pyserve.conf             your personal defaults
+```
+
+Home is searched last, so it is where personal defaults belong: a port you
+always use, your usual credentials, a policy you want everywhere. A config
+sitting next to a particular directory always wins over them.
+
+The files are not merged. The first one found is the only one read, so a
+project config has to repeat anything from your home config that it still
+wants. If you need both, point at the shared one explicitly with `-c`.
 
 ```bash
 pyserve                      # autodiscovery
@@ -30,6 +49,9 @@ pyserve --no-config          # no file at all
 ```
 
 Naming a file with `-c` turns autodiscovery off.
+
+The resolved path is available as `config.config_file`, and
+`Config.search_path()` reports the directories that were searched.
 
 Start from the shipped sample, which documents every key inline:
 

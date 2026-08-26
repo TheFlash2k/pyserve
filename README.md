@@ -151,8 +151,9 @@ Start from the shipped sample, which documents every key inline:
 cp pyserve.conf.example pyserve.conf
 ```
 
-A `pyserve.conf` next to the served directory, or in the working directory, is
-picked up on its own.
+A `pyserve.conf` next to the served directory, in the working directory, or in
+your home directory is picked up on its own. `~/.pyserve.conf` is the place for
+personal defaults; a config next to a particular directory wins over it.
 
 ## As a library
 
@@ -186,6 +187,7 @@ See [docs/library.md](docs/library.md).
 No dependencies, same as the server:
 
 ```bash
+python3 tests/test_config.py
 python3 tests/test_ignore.py
 python3 tests/test_iam.py
 ```

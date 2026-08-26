@@ -215,4 +215,6 @@ hash and exits without starting a server.
 
 **`-c` disables autodiscovery.** Naming a config file means that file and no
 other. Without `-c`, pyserve looks for `pyserve.conf` then `.pyserve.conf`,
-first next to the served directory and then in the working directory.
+first next to the served directory, then in the working directory, then in your
+home directory. The first file found is the only one read. `~/.pyserve.conf` is
+the natural home for personal defaults.

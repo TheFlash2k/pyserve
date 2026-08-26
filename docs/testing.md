@@ -4,6 +4,7 @@ The suites use the standard library only, the same as the server. There is
 nothing to install and no test runner to configure.
 
 ```bash
+python3 tests/test_config.py
 python3 tests/test_ignore.py
 python3 tests/test_iam.py
 ```
@@ -12,6 +13,17 @@ Each prints a line per failure and a summary, and exits non zero if anything
 failed.
 
 ## What is covered
+
+### `tests/test_config.py`
+
+- Autodiscovery: the three places searched, in order, and the fact that the
+  first file found is the only one read.
+- The four layers, and that each one overrides the last.
+- The file format: comments, whitespace, quoting, unknown keys and `[iam]`
+  blocks with settings on either side of them.
+- Validation, so bad configuration fails at startup rather than at the first
+  request.
+- Derived values such as the page title and the upload ceiling in bytes.
 
 ### `tests/test_ignore.py`
 

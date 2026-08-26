@@ -98,8 +98,9 @@ Copy the sample and edit it:
 cp pyserve.conf.example pyserve.conf
 ```
 
-A `pyserve.conf` next to the served directory, or in the directory you launch
-from, is picked up on its own:
+A `pyserve.conf` next to the served directory, in the directory you launch
+from, or in your home directory is picked up on its own. Put settings you
+always want into `~/.pyserve.conf`:
 
 ```ini
 DIRECTORY=/srv/files

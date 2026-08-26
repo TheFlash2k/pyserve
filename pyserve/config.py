@@ -1,5 +1,5 @@
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from .auth import MODES, SCOPES, parse_users
 from .iam import EFFECTS as IAM_EFFECTS
@@ -137,13 +137,34 @@ class Config:
 
     @staticmethod
     def discover(directory: str = ".") -> str:
-        """Looks for a pyserve.conf next to the served directory and in the cwd."""
-        for base in (directory, os.getcwd()):
+        """Finds the config file to use, or an empty string when there is none.
+
+        Three places are searched, in order, and the first file found wins:
+        next to the served directory, in the working directory, then in the
+        home directory. That last one is where personal defaults live, so a
+        config sitting next to a particular directory always takes precedence
+        over them.
+        """
+        for base in Config.search_path(directory):
             for name in DEFAULT_CONFIG_NAMES:
                 candidate = os.path.join(base, name)
                 if os.path.isfile(candidate):
                     return os.path.abspath(candidate)
         return ""
+
+    @staticmethod
+    def search_path(directory: str = ".") -> List[str]:
+        """The directories autodiscovery looks in, in order, without duplicates."""
+        bases = [
+            os.path.abspath(os.path.expanduser(directory or ".")),
+            os.getcwd(),
+            os.path.expanduser("~"),
+        ]
+        seen = []
+        for base in bases:
+            if base and base not in seen:
+                seen.append(base)
+        return seen
 
     @classmethod
     def load(
